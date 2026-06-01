@@ -292,6 +292,10 @@
       background: #b9f18b;
     }
 
+    .menu-button.worksheets {
+      background: #ffbf8f;
+    }
+
     .screen-header {
       display: flex;
       align-items: center;
@@ -473,7 +477,9 @@
 
     .syllabus-layout,
     .term-grid,
-    .topic-grid {
+    .topic-grid,
+    .worksheet-grid,
+    .worksheet-tools {
       display: grid;
       gap: 12px;
     }
@@ -582,6 +588,84 @@
     .activity-box {
       margin-top: 12px;
       background: rgba(255, 209, 102, 0.34);
+    }
+
+    .worksheet-shell {
+      padding: 16px;
+      border: 3px solid rgba(37, 48, 71, 0.08);
+      border-radius: var(--radius);
+      background: var(--panel);
+    }
+
+    .worksheet-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .worksheet-button {
+      padding: 13px;
+      text-align: left;
+      font-weight: 900;
+      background: var(--panel);
+    }
+
+    .worksheet-button.active {
+      outline: 4px solid var(--purple);
+      background: rgba(143, 101, 255, 0.18);
+    }
+
+    .worksheet-page {
+      margin-top: 14px;
+      padding: 18px;
+      border: 4px dashed rgba(37, 48, 71, 0.22);
+      border-radius: var(--radius);
+      background: #ffffff;
+      color: #253047;
+    }
+
+    .worksheet-page h3 {
+      color: #dc4242;
+      font-size: 1.65rem;
+    }
+
+    .worksheet-name-line {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 10px 0 16px;
+      color: #253047;
+      font-weight: 900;
+    }
+
+    .worksheet-items {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .worksheet-item {
+      padding: 13px;
+      border: 2px solid #d7dce8;
+      border-radius: var(--radius);
+      background: #f9fbff;
+      font-size: 1.15rem;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .trace-text {
+      display: block;
+      margin-top: 8px;
+      color: #8791a8;
+      font-size: 2rem;
+      letter-spacing: 6px;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 8px;
+    }
+
+    .worksheet-tools {
+      grid-template-columns: 1fr 1fr;
+      margin-top: 12px;
     }
 
     .source-note {
@@ -783,7 +867,8 @@
 
       .answer-grid,
       .badge-grid,
-      .term-grid {
+      .term-grid,
+      .worksheet-grid {
         grid-template-columns: repeat(2, 1fr);
       }
 
@@ -829,16 +914,23 @@
         visibility: hidden;
       }
 
+      .worksheet-page,
+      .worksheet-page *,
       .certificate,
       .certificate * {
         visibility: visible;
       }
 
+      .worksheet-page,
       .certificate {
         position: absolute;
         inset: 20px;
         display: block !important;
         box-shadow: none;
+      }
+
+      .worksheet-page {
+        border-color: #333333;
       }
     }
   </style>
@@ -875,6 +967,7 @@
           <button class="menu-button practice" type="button" data-go="practiceScreen"><span>🎯</span>Practice</button>
           <button class="menu-button quiz" type="button" data-go="quizScreen"><span>⭐</span>Quiz</button>
           <button class="menu-button syllabus" type="button" data-go="syllabusScreen"><span>🇬🇭</span>Basic 1 Syllabus</button>
+          <button class="menu-button worksheets" type="button" data-go="worksheetsScreen"><span>📝</span>Worksheets</button>
           <button class="menu-button achievements" type="button" data-go="achievementsScreen"><span>🏆</span>Achievements</button>
         </nav>
       </div>
@@ -961,6 +1054,25 @@
           <article id="subjectDetails" aria-live="polite"></article>
         </div>
         <p class="source-note">Note: Based on Ghana NaCCA lower primary learning areas. OWOP is included because many parents and schools still use the name, while NaCCA notes that from 2024/2025 its primary content is integrated into related subjects.</p>
+      </div>
+    </section>
+
+    <section class="screen" id="worksheetsScreen">
+      <div class="screen-header">
+        <button class="back-button" type="button" data-go="homeScreen">← Home</button>
+        <button class="read-button" type="button" id="readWorksheetButton">🔊 Read</button>
+      </div>
+      <div class="panel">
+        <h2>Basic 1 Worksheets</h2>
+        <p>Printable and screen-friendly practice inspired by worksheet categories like letters, numbers, maths, vocabulary, shapes, patterns, tracing, time, and matching.</p>
+        <div class="worksheet-shell">
+          <div class="worksheet-grid" id="worksheetList" aria-label="Worksheet categories"></div>
+          <div class="worksheet-tools">
+            <button class="secondary-button" type="button" id="newWorksheetButton">New Sheet</button>
+            <button class="primary-button" type="button" id="printWorksheetButton">Print</button>
+          </div>
+          <article class="worksheet-page" id="worksheetPage" aria-live="polite"></article>
+        </div>
       </div>
     </section>
 
@@ -1108,6 +1220,94 @@
       { name: "Shape Master", icon: "🌟", needed: 10 },
       { name: "Shape Champion", icon: "🏆", needed: 15 },
       { name: "Shape Genius", icon: "🧠", needed: 20 }
+    ];
+
+    // Kiddo Worksheets-style practice categories, adapted for this offline Ghana Basic 1 app.
+    const worksheetSets = [
+      {
+        title: "Alphabet Tracing",
+        icon: "🔤",
+        instruction: "Trace the letters. Say each sound aloud.",
+        items: ["Aa apple", "Bb ball", "Cc cup", "Dd drum", "Ee egg", "Ff fish"],
+        type: "trace"
+      },
+      {
+        title: "Number Tracing",
+        icon: "🔢",
+        instruction: "Trace the numbers. Count objects for each number.",
+        items: ["1 one", "2 two", "3 three", "4 four", "5 five", "6 six"],
+        type: "trace"
+      },
+      {
+        title: "Missing Numbers",
+        icon: "➕",
+        instruction: "Write the missing number in each space.",
+        items: ["1, 2, __, 4", "5, __, 7, 8", "10, 11, __, 13", "15, __, 17, 18", "20, 21, __, 23"],
+        type: "write"
+      },
+      {
+        title: "Basic Addition",
+        icon: "🧮",
+        instruction: "Use bottle tops or fingers to solve.",
+        items: ["2 + 1 = ___", "3 + 2 = ___", "4 + 1 = ___", "5 + 2 = ___", "6 + 3 = ___"],
+        type: "write"
+      },
+      {
+        title: "Basic Subtraction",
+        icon: "➖",
+        instruction: "Take away and write the answer.",
+        items: ["3 - 1 = ___", "5 - 2 = ___", "6 - 1 = ___", "7 - 3 = ___", "9 - 4 = ___"],
+        type: "write"
+      },
+      {
+        title: "Sight Words",
+        icon: "👀",
+        instruction: "Read, trace, and say each word in a sentence.",
+        items: ["I", "am", "the", "is", "see", "my"],
+        type: "trace"
+      },
+      {
+        title: "Vocabulary Match",
+        icon: "🧩",
+        instruction: "Draw a line to match each word to what it means.",
+        items: ["sun → bright thing in the sky", "book → pages we read", "market → place to buy things", "school → place to learn", "family → people at home"],
+        type: "match"
+      },
+      {
+        title: "Shapes",
+        icon: "🔷",
+        instruction: "Name each shape and draw one more.",
+        items: ["Circle ○", "Square □", "Triangle △", "Rectangle ▭", "Cube 🎲", "Sphere ⚽"],
+        type: "draw"
+      },
+      {
+        title: "Patterns",
+        icon: "🔴",
+        instruction: "Say the pattern. Draw what comes next.",
+        items: ["Red, blue, red, blue, ___", "Big, small, big, small, ___", "Circle, square, circle, square, ___", "1, 2, 1, 2, ___"],
+        type: "draw"
+      },
+      {
+        title: "Body Parts",
+        icon: "🙋",
+        instruction: "Point to each body part, then write or say its name.",
+        items: ["head", "eyes", "ears", "nose", "hands", "legs"],
+        type: "write"
+      },
+      {
+        title: "Telling Time",
+        icon: "🕘",
+        instruction: "Talk about when each activity happens.",
+        items: ["Morning: I wake up at ___", "Afternoon: I eat lunch at ___", "Evening: I play at ___", "Night: I sleep at ___"],
+        type: "write"
+      },
+      {
+        title: "OWOP and Ghana",
+        icon: "🇬🇭",
+        instruction: "Read and answer with an adult.",
+        items: ["My name is __________.", "I live in __________.", "The colours of Ghana flag are __________.", "One community helper is __________.", "I keep my environment clean by __________."],
+        type: "write"
+      }
     ];
 
     // Ghana Basic 1 syllabus guide written for home support and quick parent planning.
@@ -1291,6 +1491,7 @@
       lessonIndex: 0,
       syllabusIndex: 0,
       syllabusTopicIndex: 0,
+      worksheetIndex: 0,
       selectedObject: null,
       selectedShape: null,
       matched: new Set(),
@@ -1321,6 +1522,8 @@
     const celebration = document.getElementById("celebration");
     const subjectList = document.getElementById("subjectList");
     const subjectDetails = document.getElementById("subjectDetails");
+    const worksheetList = document.getElementById("worksheetList");
+    const worksheetPage = document.getElementById("worksheetPage");
 
     document.querySelectorAll("[data-go]").forEach((button) => {
       button.addEventListener("click", () => showScreen(button.dataset.go));
@@ -1331,6 +1534,9 @@
     document.getElementById("installButton").addEventListener("click", installApp);
     document.getElementById("readLessonButton").addEventListener("click", readLesson);
     document.getElementById("readSyllabusButton").addEventListener("click", readSyllabus);
+    document.getElementById("readWorksheetButton").addEventListener("click", readWorksheet);
+    document.getElementById("newWorksheetButton").addEventListener("click", makeNewWorksheet);
+    document.getElementById("printWorksheetButton").addEventListener("click", () => window.print());
     document.getElementById("prevLessonButton").addEventListener("click", () => changeLesson(-1));
     document.getElementById("nextLessonButton").addEventListener("click", () => changeLesson(1));
     document.getElementById("resetPracticeButton").addEventListener("click", resetPractice);
@@ -1346,6 +1552,7 @@
     renderLesson();
     renderPractice();
     renderSyllabus();
+    renderWorksheets();
     startQuiz();
     renderAchievements();
 
@@ -1360,6 +1567,9 @@
       }
       if (id === "syllabusScreen") {
         renderSyllabus();
+      }
+      if (id === "worksheetsScreen") {
+        renderWorksheets();
       }
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -1529,6 +1739,55 @@
       if (title.includes("computer") || title.includes("device")) return "Point to the screen, keyboard, and mouse or touchpad.";
       if (title.includes("ghana") || title.includes("nation")) return "Point to Ghana on a map or say the colours of the Ghana flag.";
       return subject.activity;
+    }
+
+    // Builds printable worksheet-style practice pages inside the app.
+    function renderWorksheets() {
+      const worksheet = worksheetSets[state.worksheetIndex];
+      worksheetList.innerHTML = "";
+      worksheetSets.forEach((sheet, index) => {
+        const button = document.createElement("button");
+        button.className = `worksheet-button ${index === state.worksheetIndex ? "active" : ""}`;
+        button.type = "button";
+        button.textContent = `${sheet.icon} ${sheet.title}`;
+        button.addEventListener("click", () => {
+          state.worksheetIndex = index;
+          renderWorksheets();
+        });
+        worksheetList.appendChild(button);
+      });
+
+      worksheetPage.innerHTML = `
+        <h3>${worksheet.icon} ${worksheet.title}</h3>
+        <div class="worksheet-name-line">
+          <span>Name: __________________</span>
+          <span>Date: __________________</span>
+        </div>
+        <p><strong>Instruction:</strong> ${worksheet.instruction}</p>
+        <div class="worksheet-items">
+          ${worksheet.items.map((item, index) => makeWorksheetItem(item, index, worksheet.type)).join("")}
+        </div>
+      `;
+    }
+
+    function makeWorksheetItem(item, index, type) {
+      if (type === "trace") {
+        return `<div class="worksheet-item">${index + 1}. Say and trace:<span class="trace-text">${item}</span></div>`;
+      }
+      if (type === "draw") {
+        return `<div class="worksheet-item">${index + 1}. ${item}<br><br>Draw here: ______________________________</div>`;
+      }
+      if (type === "match") {
+        return `<div class="worksheet-item">${index + 1}. ${item}</div>`;
+      }
+      return `<div class="worksheet-item">${index + 1}. ${item}</div>`;
+    }
+
+    function makeNewWorksheet() {
+      const current = worksheetSets[state.worksheetIndex];
+      current.items = shuffle(current.items);
+      renderWorksheets();
+      showCelebration("📝");
     }
 
     // Builds the object and shape buttons for the matching game.
@@ -1771,6 +2030,11 @@
       const subject = syllabusSubjects[state.syllabusIndex];
       const topic = subject.topics[state.syllabusTopicIndex] || subject.topics[0];
       speak(`${subject.subject}. ${topic.title}. ${makeChildIntro(subject, topic)} Learn these: ${topic.items.join(", ")}. Try this now: ${makeTopicActivity(subject, topic)}`);
+    }
+
+    function readWorksheet() {
+      const worksheet = worksheetSets[state.worksheetIndex];
+      speak(`${worksheet.title}. ${worksheet.instruction}. ${worksheet.items.join(". ")}`);
     }
 
     // Uses the browser's built-in voice when available. The app still works without it.

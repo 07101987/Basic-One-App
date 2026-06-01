@@ -1,6 +1,6 @@
-const CACHE_NAME = "3d-shapes-adventure-v3";
+const CACHE_NAME = "3d-shapes-adventure-v4";
 const APP_FILES = [
-  "./3D_Shapes_Adventure.html",
+  "./index.html",
   "./manifest.webmanifest",
   "./icons/icon-180.png",
   "./icons/icon-192.png",

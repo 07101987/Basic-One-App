@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D Shapes Adventure</title>
+  <meta name="description" content="A mobile-first Ghana Basic 1 learning app with 3D shapes, quiz, syllabus, badges, and certificate." />
+  <meta name="theme-color" content="#ff6b6b" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="3D Shapes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
+  <style>
+    :root {
+      --bg: #fff8df;
+      --panel: #ffffff;
+      --text: #253047;
+      --muted: #5d6682;
+      --primary: #ff6b6b;
+      --primary-dark: #dc4242;
+      --secondary: #2ec4b6;
+      --accent: #ffd166;
+      --blue: #4d96ff;
+      --green: #42c767;
+      --purple: #8f65ff;
+      --shadow: 0 12px 28px rgba(37, 48, 71, 0.16);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: "Trebuchet MS", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(255, 209, 102, 0.45), transparent 28%),
+        radial-gradient(circle at 85% 18%, rgba(46, 196, 182, 0.24), transparent 25%),
+        linear-gradient(180deg, var(--bg), #e9f8ff);
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    body.dark {
+      --bg: #171a28;
+      --panel: #24283a;
+      --text: #f7f7ff;
+      --muted: #c3c7dc;
+      --primary: #ff8a65;
+      --primary-dark: #ff7043;
+      --secondary: #3dd6c6;
+      --accent: #f9ca4f;
+      --blue: #76a9ff;
+      --green: #69d884;
+      --purple: #a78bfa;
+      --shadow: 0 14px 30px rgba(0, 0, 0, 0.32);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255, 209, 102, 0.18), transparent 24%),
+        radial-gradient(circle at 88% 14%, rgba(61, 214, 198, 0.15), transparent 23%),
+        linear-gradient(180deg, #171a28, #101525);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      min-height: 48px;
+      border: 0;
+      border-radius: var(--radius);
+      cursor: pointer;
+      color: var(--text);
+      background: var(--accent);
+      box-shadow: 0 5px 0 rgba(37, 48, 71, 0.18);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    }
+
+    button:hover,
+    button:focus-visible {
+      transform: translateY(-2px);
+      filter: brightness(1.03);
+    }
+
+    button:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 rgba(37, 48, 71, 0.18);
+    }
+
+    .app {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      padding: 14px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      font-size: clamp(1.1rem, 4vw, 1.7rem);
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 46px;
+      height: 46px;
+      place-items: center;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      box-shadow: var(--shadow);
+      animation: bob 2.8s ease-in-out infinite;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-button {
+      width: 48px;
+      padding: 0;
+      font-size: 1.3rem;
+      background: var(--panel);
+    }
+
+    .install-banner {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding: 12px;
+      border: 3px solid rgba(37, 48, 71, 0.08);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .install-banner.show {
+      display: flex;
+    }
+
+    .install-banner p {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .install-banner button {
+      flex: 0 0 auto;
+      padding: 10px 12px;
+      font-weight: 900;
+      background: var(--green);
+    }
+
+    .screen {
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .hero,
+    .panel,
+    .lesson-card,
+    .game-area,
+    .certificate,
+    .dashboard-grid > article {
+      border: 3px solid rgba(37, 48, 71, 0.08);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: clamp(20px, 5vw, 36px);
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .floating-shapes {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      font-size: clamp(2.2rem, 12vw, 5rem);
+    }
+
+    .floating-shapes span {
+      display: inline-block;
+      animation: wiggle 3s ease-in-out infinite;
+    }
+
+    .floating-shapes span:nth-child(2) {
+      animation-delay: 0.35s;
+    }
+
+    .floating-shapes span:nth-child(3) {
+      animation-delay: 0.7s;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0 0 10px;
+      line-height: 1.1;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 10vw, 4.6rem);
+      color: var(--primary-dark);
+      text-shadow: 2px 3px 0 rgba(255, 209, 102, 0.7);
+    }
+
+    h2 {
+      font-size: clamp(1.8rem, 7vw, 3rem);
+      color: var(--blue);
+    }
+
+    h3 {
+      font-size: clamp(1.25rem, 4vw, 1.8rem);
+    }
+
+    p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: clamp(1.05rem, 3.7vw, 1.25rem);
+      line-height: 1.45;
+    }
+
+    .menu-grid,
+    .lesson-nav,
+    .answer-grid,
+    .dashboard-grid,
+    .badge-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .menu-grid {
+      grid-template-columns: 1fr;
+      margin-top: 22px;
+    }
+
+    .menu-button {
+      padding: 18px;
+      font-size: clamp(1.2rem, 4.5vw, 1.5rem);
+      font-weight: 900;
+      text-align: left;
+    }
+
+    .menu-button span {
+      margin-right: 8px;
+      font-size: 1.45em;
+      vertical-align: middle;
+    }
+
+    .menu-button.learn {
+      background: #8df0d2;
+    }
+
+    .menu-button.practice {
+      background: #ffd166;
+    }
+
+    .menu-button.quiz {
+      background: #ff9bd2;
+    }
+
+    .menu-button.achievements {
+      background: #9bd2ff;
+    }
+
+    .menu-button.syllabus {
+      background: #b9f18b;
+    }
+
+    .screen-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 8px 0 14px;
+    }
+
+    .back-button,
+    .read-button,
+    .secondary-button {
+      padding: 12px 14px;
+      font-weight: 900;
+      background: var(--panel);
+    }
+
+    .lesson-card,
+    .panel,
+    .game-area {
+      padding: 16px;
+    }
+
+    .lesson-emoji {
+      display: grid;
+      place-items: center;
+      min-height: 146px;
+      margin-bottom: 12px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(77, 150, 255, 0.18), rgba(255, 209, 102, 0.36));
+      font-size: clamp(5rem, 28vw, 9rem);
+      animation: bob 3s ease-in-out infinite;
+    }
+
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 14px 0;
+    }
+
+    .fact {
+      padding: 12px 8px;
+      border-radius: var(--radius);
+      text-align: center;
+      background: rgba(46, 196, 182, 0.16);
+      font-weight: 900;
+    }
+
+    .fact strong {
+      display: block;
+      color: var(--primary-dark);
+      font-size: 1.55rem;
+    }
+
+    .examples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 16px;
+    }
+
+    .chip {
+      padding: 9px 11px;
+      border-radius: 8px;
+      background: rgba(255, 209, 102, 0.45);
+      font-weight: 800;
+    }
+
+    .primary-button {
+      width: 100%;
+      padding: 15px 16px;
+      font-size: 1.15rem;
+      font-weight: 900;
+      background: var(--green);
+    }
+
+    .lesson-nav {
+      grid-template-columns: 1fr 1fr;
+      margin-top: 10px;
+    }
+
+    .object-list,
+    .shape-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .match-columns {
+      display: grid;
+      gap: 14px;
+    }
+
+    .match-card {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.1rem;
+      font-weight: 900;
+      text-align: center;
+      background: var(--panel);
+    }
+
+    .match-card.selected {
+      outline: 4px solid var(--blue);
+      background: rgba(77, 150, 255, 0.18);
+    }
+
+    .match-card.done {
+      background: rgba(66, 199, 103, 0.25);
+      opacity: 0.82;
+    }
+
+    .feedback {
+      min-height: 44px;
+      margin: 14px 0 4px;
+      font-weight: 900;
+      font-size: 1.4rem;
+      text-align: center;
+    }
+
+    .quiz-card {
+      padding: 16px;
+    }
+
+    .score-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .progress-shell {
+      height: 20px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(37, 48, 71, 0.12);
+    }
+
+    .progress-fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--secondary), var(--green));
+      transition: width 0.25s ease;
+    }
+
+    .question {
+      margin: 20px 0;
+      font-size: clamp(1.35rem, 5vw, 2rem);
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .answer-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .answer-button {
+      padding: 16px;
+      font-size: 1.1rem;
+      font-weight: 900;
+      background: #9bd2ff;
+    }
+
+    .answer-button.correct {
+      background: var(--green);
+      animation: pop 0.35s ease;
+    }
+
+    .answer-button.wrong {
+      background: #ff8a8a;
+    }
+
+    .badge-grid {
+      grid-template-columns: 1fr;
+      margin: 14px 0;
+    }
+
+    .syllabus-layout,
+    .term-grid,
+    .topic-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .subject-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .subject-button {
+      padding: 13px;
+      text-align: left;
+      font-weight: 900;
+      background: var(--panel);
+    }
+
+    .subject-button.active {
+      outline: 4px solid var(--secondary);
+      background: rgba(46, 196, 182, 0.2);
+    }
+
+    .topic-card,
+    .term-card,
+    .activity-box {
+      padding: 13px;
+      border-radius: var(--radius);
+      background: rgba(77, 150, 255, 0.12);
+    }
+
+    .topic-card h3,
+    .term-card h3 {
+      color: var(--primary-dark);
+      font-size: 1.16rem;
+    }
+
+    .topic-card ul,
+    .term-card ul {
+      margin: 8px 0 0;
+      padding-left: 20px;
+      color: var(--muted);
+      font-size: 1.03rem;
+      line-height: 1.45;
+    }
+
+    .activity-box {
+      margin-top: 12px;
+      background: rgba(255, 209, 102, 0.34);
+    }
+
+    .source-note {
+      margin-top: 12px;
+      font-size: 0.95rem;
+    }
+
+    .badge {
+      padding: 16px;
+      border: 3px dashed rgba(37, 48, 71, 0.18);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.62);
+      text-align: center;
+      opacity: 0.55;
+    }
+
+    body.dark .badge {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .badge.earned {
+      border-style: solid;
+      opacity: 1;
+      background: rgba(255, 209, 102, 0.38);
+      animation: pop 0.45s ease;
+    }
+
+    .badge-icon {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 2.7rem;
+    }
+
+    .dashboard-grid {
+      grid-template-columns: 1fr 1fr;
+      margin: 14px 0;
+    }
+
+    .dashboard-grid > article {
+      padding: 14px;
+      text-align: center;
+    }
+
+    .dashboard-number {
+      display: block;
+      margin-top: 4px;
+      color: var(--primary-dark);
+      font-size: clamp(1.7rem, 8vw, 2.5rem);
+      font-weight: 900;
+    }
+
+    .name-row {
+      display: grid;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .name-input {
+      width: 100%;
+      min-height: 50px;
+      padding: 12px;
+      border: 3px solid rgba(37, 48, 71, 0.18);
+      border-radius: var(--radius);
+      color: var(--text);
+      background: var(--panel);
+      font-size: 1.1rem;
+    }
+
+    .certificate {
+      display: none;
+      margin-top: 16px;
+      padding: 22px 16px;
+      text-align: center;
+      border: 6px double var(--accent);
+      background: linear-gradient(180deg, #fff, #fff8df);
+      color: #253047;
+    }
+
+    .certificate.show {
+      display: block;
+    }
+
+    .certificate h3 {
+      color: #dc4242;
+      font-size: clamp(1.9rem, 8vw, 3rem);
+    }
+
+    .certificate-name {
+      margin: 8px 0;
+      color: #2c7be5;
+      font-size: clamp(2rem, 10vw, 3.6rem);
+      font-weight: 900;
+    }
+
+    .certificate-title {
+      color: #253047;
+      font-size: 1.35rem;
+      font-weight: 900;
+    }
+
+    .confetti-piece {
+      position: fixed;
+      top: -18px;
+      z-index: 20;
+      width: 12px;
+      height: 18px;
+      pointer-events: none;
+      animation: confettiFall 1.8s linear forwards;
+    }
+
+    .celebration {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      z-index: 30;
+      pointer-events: none;
+      font-size: clamp(4rem, 28vw, 10rem);
+      animation: pop 0.5s ease;
+    }
+
+    .celebration.show {
+      display: grid;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes bob {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-7px);
+      }
+    }
+
+    @keyframes wiggle {
+      0%,
+      100% {
+        transform: rotate(-4deg) scale(1);
+      }
+      50% {
+        transform: rotate(4deg) scale(1.08);
+      }
+    }
+
+    @keyframes pop {
+      0% {
+        transform: scale(0.82);
+      }
+      70% {
+        transform: scale(1.08);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes confettiFall {
+      to {
+        transform: translateY(105vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    @media (min-width: 680px) {
+      .app {
+        padding: 22px;
+      }
+
+      .menu-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .lesson-card,
+      .quiz-card,
+      .game-area,
+      .panel {
+        padding: 24px;
+      }
+
+      .match-columns {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .answer-grid,
+      .badge-grid,
+      .term-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .topic-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .name-row {
+        grid-template-columns: 1fr auto;
+        align-items: center;
+      }
+    }
+
+    @media (min-width: 980px) {
+      .lesson-card {
+        display: grid;
+        grid-template-columns: 0.95fr 1.35fr;
+        gap: 24px;
+        align-items: center;
+      }
+
+      .lesson-emoji {
+        min-height: 340px;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .syllabus-layout {
+        grid-template-columns: 280px 1fr;
+        align-items: start;
+      }
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+
+      .certificate,
+      .certificate * {
+        visibility: visible;
+      }
+
+      .certificate {
+        position: absolute;
+        inset: 20px;
+        display: block !important;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand" aria-label="3D Shapes Adventure">
+        <span class="brand-mark" aria-hidden="true">🔷</span>
+        <span>3D Shapes Adventure</span>
+      </div>
+      <div class="top-actions">
+        <button class="icon-button" id="soundButton" type="button" title="Read aloud">🔊</button>
+        <button class="icon-button" id="darkButton" type="button" title="Dark mode">🌙</button>
+      </div>
+    </header>
+
+    <section class="install-banner" id="installBanner" aria-live="polite">
+      <p>Install this learning app on your phone or tablet.</p>
+      <button type="button" id="installButton">Install</button>
+    </section>
+
+    <section class="screen active" id="homeScreen">
+      <div class="hero">
+        <div class="floating-shapes" aria-hidden="true">
+          <span>🎲</span>
+          <span>🍉</span>
+          <span>🍦</span>
+        </div>
+        <h1>3D Shapes Adventure</h1>
+        <p>Hello, shape explorer! Learn about cubes, cones, spheres, and more with games, quizzes, badges, and a champion certificate.</p>
+        <nav class="menu-grid" aria-label="Main menu">
+          <button class="menu-button learn" type="button" data-go="learnScreen"><span>📚</span>Learn</button>
+          <button class="menu-button practice" type="button" data-go="practiceScreen"><span>🎯</span>Practice</button>
+          <button class="menu-button quiz" type="button" data-go="quizScreen"><span>⭐</span>Quiz</button>
+          <button class="menu-button syllabus" type="button" data-go="syllabusScreen"><span>🇬🇭</span>Basic 1 Syllabus</button>
+          <button class="menu-button achievements" type="button" data-go="achievementsScreen"><span>🏆</span>Achievements</button>
+        </nav>
+      </div>
+    </section>
+
+    <section class="screen" id="learnScreen">
+      <div class="screen-header">
+        <button class="back-button" type="button" data-go="homeScreen">← Home</button>
+        <button class="read-button" type="button" id="readLessonButton">🔊 Read</button>
+      </div>
+      <article class="lesson-card" aria-live="polite">
+        <div class="lesson-emoji" id="lessonEmoji" aria-hidden="true">🎲</div>
+        <div>
+          <h2 id="lessonTitle">Cube</h2>
+          <p id="lessonText">A cube is a 3D shape with all sides the same size. Every face is a square.</p>
+          <div class="facts">
+            <div class="fact"><strong id="facesCount">6</strong>Faces</div>
+            <div class="fact"><strong id="edgesCount">12</strong>Edges</div>
+            <div class="fact"><strong id="cornersCount">8</strong>Corners</div>
+          </div>
+          <h3>Real-life examples</h3>
+          <div class="examples" id="lessonExamples"></div>
+          <div class="lesson-nav">
+            <button class="secondary-button" type="button" id="prevLessonButton">← Back</button>
+            <button class="primary-button" type="button" id="nextLessonButton">Next Lesson →</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="screen" id="practiceScreen">
+      <div class="screen-header">
+        <button class="back-button" type="button" data-go="homeScreen">← Home</button>
+        <button class="secondary-button" type="button" id="resetPracticeButton">Reset</button>
+      </div>
+      <div class="game-area">
+        <h2>Match the Object</h2>
+        <p>Tap an object, then tap the 3D shape it matches.</p>
+        <div class="match-columns">
+          <div>
+            <h3>Objects</h3>
+            <div class="object-list" id="objectList"></div>
+          </div>
+          <div>
+            <h3>Shapes</h3>
+            <div class="shape-list" id="shapeList"></div>
+          </div>
+        </div>
+        <div class="feedback" id="practiceFeedback" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="quizScreen">
+      <div class="screen-header">
+        <button class="back-button" type="button" data-go="homeScreen">← Home</button>
+        <button class="secondary-button" type="button" id="restartQuizButton">Restart</button>
+      </div>
+      <div class="panel quiz-card">
+        <h2>Shape Quiz</h2>
+        <div class="score-row">
+          <span id="scoreText">Score: 0</span>
+          <span id="questionCountText">Question 1 of 20</span>
+        </div>
+        <div class="progress-shell" aria-label="Quiz progress">
+          <div class="progress-fill" id="quizProgress"></div>
+        </div>
+        <div class="question" id="questionText">Loading question...</div>
+        <div class="answer-grid" id="answerGrid"></div>
+        <p class="feedback" id="quizFeedback" aria-live="polite"></p>
+        <button class="primary-button hidden" type="button" id="nextQuestionButton">Next Question →</button>
+      </div>
+    </section>
+
+    <section class="screen" id="syllabusScreen">
+      <div class="screen-header">
+        <button class="back-button" type="button" data-go="homeScreen">← Home</button>
+        <button class="read-button" type="button" id="readSyllabusButton">🔊 Read</button>
+      </div>
+      <div class="panel">
+        <h2>Ghana Basic 1 Syllabus</h2>
+        <p>A parent-friendly guide for Basic 1 learning areas in Ghana, with simple topics and home activities for a 5-year-old learner.</p>
+        <div class="syllabus-layout">
+          <aside class="subject-list" id="subjectList" aria-label="Basic 1 subjects"></aside>
+          <article id="subjectDetails" aria-live="polite"></article>
+        </div>
+        <p class="source-note">Note: Based on Ghana NaCCA lower primary learning areas. OWOP is included because many parents and schools still use the name, while NaCCA notes that from 2024/2025 its primary content is integrated into related subjects.</p>
+      </div>
+    </section>
+
+    <section class="screen" id="achievementsScreen">
+      <div class="screen-header">
+        <button class="back-button" type="button" data-go="homeScreen">← Home</button>
+        <button class="secondary-button" type="button" id="clearProgressButton">Clear</button>
+      </div>
+      <div class="panel">
+        <h2>Achievements</h2>
+        <p>Badges light up when quiz answers are correct. Keep exploring!</p>
+        <div class="badge-grid" id="badgeGrid"></div>
+      </div>
+
+      <div class="panel" style="margin-top: 14px;">
+        <h2>Parent Dashboard</h2>
+        <div class="dashboard-grid">
+          <article>Total quizzes <span class="dashboard-number" id="totalQuizzes">0</span></article>
+          <article>Highest score <span class="dashboard-number" id="highestScore">0</span></article>
+          <article>Progress <span class="dashboard-number" id="progressPercent">0%</span></article>
+          <article>Shapes mastered <span class="dashboard-number" id="shapesMastered">0</span></article>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top: 14px;">
+        <h2>Certificate</h2>
+        <p>Score 80% or more in the quiz to unlock a printable certificate.</p>
+        <div class="name-row">
+          <input class="name-input" id="childName" type="text" maxlength="28" placeholder="Child's name" aria-label="Child's name" />
+          <button class="primary-button" type="button" id="makeCertificateButton">Make Certificate</button>
+        </div>
+        <button class="secondary-button" type="button" id="printCertificateButton">🖨️ Print Certificate</button>
+        <div class="certificate" id="certificate">
+          <p class="certificate-title">This certificate is proudly awarded to</p>
+          <div class="certificate-name" id="certificateName">Shape Explorer</div>
+          <h3>3D Shapes Champion</h3>
+          <p id="certificateScore">Score: 0 out of 20</p>
+          <p id="certificateDate">Date</p>
+          <p>For brilliant learning about cubes, cuboids, cylinders, cones, spheres, and pyramids.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="celebration" id="celebration" aria-hidden="true">🎉</div>
+
+  <script>
+    "use strict";
+
+    // Lesson data drives the Learn screen, so adding a new shape only needs one new object here.
+    const lessons = [
+      {
+        name: "Cube",
+        emoji: "🎲",
+        text: "A cube is a 3D shape with all sides the same size. Every face is a square.",
+        faces: 6,
+        edges: 12,
+        corners: 8,
+        examples: ["Dice", "Building block", "Gift box"]
+      },
+      {
+        name: "Cuboid",
+        emoji: "📦",
+        text: "A cuboid is like a stretched cube. Its faces are rectangles.",
+        faces: 6,
+        edges: 12,
+        corners: 8,
+        examples: ["Matchbox", "Book", "Brick"]
+      },
+      {
+        name: "Cylinder",
+        emoji: "🥫",
+        text: "A cylinder has two flat circle faces and one curved surface.",
+        faces: 3,
+        edges: 2,
+        corners: 0,
+        examples: ["Tin of milk", "Can", "Drum"]
+      },
+      {
+        name: "Cone",
+        emoji: "🍦",
+        text: "A cone has one flat circle face, one curved surface, and one point.",
+        faces: 2,
+        edges: 1,
+        corners: 1,
+        examples: ["Ice cream cone", "Party hat", "Traffic cone"]
+      },
+      {
+        name: "Sphere",
+        emoji: "🍉",
+        text: "A sphere is round like a ball. It has one curved surface and no corners.",
+        faces: 1,
+        edges: 0,
+        corners: 0,
+        examples: ["Watermelon", "Ball", "Orange"]
+      },
+      {
+        name: "Pyramid",
+        emoji: "🔺",
+        text: "A pyramid has a flat base and triangle faces that meet at a point.",
+        faces: 5,
+        edges: 8,
+        corners: 5,
+        examples: ["Egyptian pyramid", "Tent roof", "Pyramid toy"]
+      }
+    ];
+
+    // Practice pairs for the matching game.
+    const matches = [
+      { object: "🎲 Dice", shape: "Cube" },
+      { object: "📦 Matchbox", shape: "Cuboid" },
+      { object: "🍉 Watermelon", shape: "Sphere" },
+      { object: "🥫 Tin of Milk", shape: "Cylinder" },
+      { object: "🍦 Ice Cream Cone", shape: "Cone" },
+      { object: "🔺 Pyramid", shape: "Pyramid" }
+    ];
+
+    // Twenty quiz questions shown one at a time.
+    const quizQuestions = [
+      { q: "Which 3D shape is like a dice?", a: "Cube", choices: ["Cube", "Cone", "Sphere", "Cylinder"] },
+      { q: "How many faces does a cube have?", a: "6", choices: ["4", "5", "6", "8"] },
+      { q: "Which shape is round like a ball?", a: "Sphere", choices: ["Cuboid", "Sphere", "Pyramid", "Cone"] },
+      { q: "Which object is a cylinder?", a: "Tin of Milk", choices: ["Dice", "Tin of Milk", "Watermelon", "Matchbox"] },
+      { q: "A cone has how many points?", a: "1", choices: ["0", "1", "4", "8"] },
+      { q: "Which shape has rectangle faces?", a: "Cuboid", choices: ["Cuboid", "Sphere", "Cone", "Cylinder"] },
+      { q: "How many corners does a sphere have?", a: "0", choices: ["0", "1", "6", "8"] },
+      { q: "Which 3D shape is like an ice cream cone?", a: "Cone", choices: ["Cube", "Cone", "Cylinder", "Pyramid"] },
+      { q: "How many edges does a cube have?", a: "12", choices: ["6", "8", "12", "14"] },
+      { q: "What shape is a matchbox?", a: "Cuboid", choices: ["Cuboid", "Cone", "Sphere", "Pyramid"] },
+      { q: "Which shape has two circle faces?", a: "Cylinder", choices: ["Cylinder", "Cube", "Sphere", "Pyramid"] },
+      { q: "How many corners does a cube have?", a: "8", choices: ["0", "4", "6", "8"] },
+      { q: "Which shape has triangle faces meeting at a point?", a: "Pyramid", choices: ["Pyramid", "Sphere", "Cylinder", "Cuboid"] },
+      { q: "Which shape has no edges?", a: "Sphere", choices: ["Cube", "Cone", "Sphere", "Pyramid"] },
+      { q: "How many faces does a cuboid have?", a: "6", choices: ["2", "4", "6", "10"] },
+      { q: "Which shape can roll and has flat circle faces?", a: "Cylinder", choices: ["Cylinder", "Cuboid", "Pyramid", "Cube"] },
+      { q: "What shape is a watermelon most like?", a: "Sphere", choices: ["Sphere", "Cube", "Cone", "Cuboid"] },
+      { q: "How many edges does a cone have?", a: "1", choices: ["0", "1", "3", "12"] },
+      { q: "Which shape has 5 faces in this app?", a: "Pyramid", choices: ["Pyramid", "Cube", "Sphere", "Cylinder"] },
+      { q: "Which answer names all 3D shapes?", a: "Cube, sphere, cone", choices: ["Square, circle, triangle", "Cube, sphere, cone", "Line, dot, oval", "Star, heart, arrow"] }
+    ];
+
+    // Badge rules are based on the child's best quiz score.
+    const badgeRules = [
+      { name: "Shape Explorer", icon: "🧭", needed: 5 },
+      { name: "Shape Master", icon: "🌟", needed: 10 },
+      { name: "Shape Champion", icon: "🏆", needed: 15 },
+      { name: "Shape Genius", icon: "🧠", needed: 20 }
+    ];
+
+    // Ghana Basic 1 syllabus guide written for home support and quick parent planning.
+    const syllabusSubjects = [
+      {
+        subject: "Mathematics",
+        icon: "🔢",
+        goal: "Build number sense, counting confidence, early operations, measurement, money, time, data, and shapes.",
+        topics: [
+          { title: "Numbers and Counting", items: ["Count, read, and write numbers", "Compare more, less, and equal", "Order numbers from smallest to biggest", "Skip count in simple patterns"] },
+          { title: "Operations", items: ["Add using objects and fingers", "Subtract by taking away", "Make number bonds", "Solve simple story problems"] },
+          { title: "Measurement and Money", items: ["Compare long and short", "Compare heavy and light", "Name Ghana coins and notes", "Use morning, afternoon, evening, today, and tomorrow"] },
+          { title: "Geometry and Data", items: ["Name flat shapes and solid shapes", "Sort objects by colour, size, and shape", "Make simple patterns", "Read simple picture graphs"] }
+        ],
+        terms: [
+          { name: "Term 1", items: ["Counting objects", "Number writing", "Sorting and patterns", "Basic shapes"] },
+          { name: "Term 2", items: ["Addition", "Subtraction", "Length and weight", "Money"] },
+          { name: "Term 3", items: ["Time words", "Data and picture graphs", "3D shapes", "Mixed story problems"] }
+        ],
+        activity: "Use bottle tops, stones, beans, or pencils to count, add, subtract, group, and compare."
+      },
+      {
+        subject: "English Language",
+        icon: "📖",
+        goal: "Grow listening, speaking, phonics, handwriting, reading, vocabulary, and early writing.",
+        topics: [
+          { title: "Listening and Speaking", items: ["Listen to short stories", "Answer simple questions", "Retell events in order", "Use polite words in conversation"] },
+          { title: "Phonics and Reading", items: ["Recognise letter sounds", "Blend sounds to read simple words", "Read sight words", "Read short sentences with pictures"] },
+          { title: "Writing", items: ["Hold a pencil correctly", "Form upper and lower case letters", "Copy words and short sentences", "Write own name and simple captions"] },
+          { title: "Vocabulary and Grammar", items: ["Name people, places, animals, and things", "Use describing words", "Use I, you, he, she, we, and they", "Speak in clear sentences"] }
+        ],
+        terms: [
+          { name: "Term 1", items: ["Letter names and sounds", "Oral stories", "Name writing", "Classroom words"] },
+          { name: "Term 2", items: ["Blending sounds", "Sight words", "Sentence copying", "Question words"] },
+          { name: "Term 3", items: ["Short reading passages", "Simple descriptions", "Story retelling", "Independent sentence writing"] }
+        ],
+        activity: "Read one short story daily, ask 'who, what, where' questions, and let him draw and label one picture."
+      },
+      {
+        subject: "Our World and Our People",
+        icon: "🌍",
+        shortName: "OWOP",
+        goal: "Help children understand themselves, family, community, Ghana, values, the environment, and responsible living.",
+        topics: [
+          { title: "All About Us", items: ["God as Creator", "Myself and my body", "My family", "Home and school"] },
+          { title: "All Around Us", items: ["The environment and weather", "Plants and animals", "Simple directions and landmarks", "Age groups and respect"] },
+          { title: "Beliefs and Values", items: ["Worship", "Festivals", "Basic human rights", "Leadership and responsibility"] },
+          { title: "Our Nation Ghana", items: ["Being a good citizen", "Authority and rules", "Using resources wisely", "Farming in Ghana"] }
+        ],
+        terms: [
+          { name: "Term 1", items: ["Myself", "Family", "Home and school", "Weather"] },
+          { name: "Term 2", items: ["Plants and animals", "Directions", "Festivals", "Rights and duties"] },
+          { name: "Term 3", items: ["Citizenship", "Leadership", "Resources", "Farming and community helpers"] }
+        ],
+        activity: "Let him talk about his home, draw family members, observe the weather, and name helpers in the community."
+      },
+      {
+        subject: "Science",
+        icon: "🔬",
+        goal: "Encourage curiosity through observation, living things, materials, energy, the sky, and simple investigations.",
+        topics: [
+          { title: "Living Things", items: ["Parts of plants", "Common animals", "Needs of plants and animals", "Care for living things"] },
+          { title: "Humans and Health", items: ["Parts of the body", "Keeping clean", "Healthy foods", "Safe habits"] },
+          { title: "Materials and Forces", items: ["Hard and soft objects", "Float and sink", "Push and pull", "Uses of everyday materials"] },
+          { title: "Earth and Sky", items: ["Weather changes", "Day and night", "Sun, moon, and stars", "Keeping the environment clean"] }
+        ],
+        terms: [
+          { name: "Term 1", items: ["Observation skills", "Body parts", "Plants", "Animals"] },
+          { name: "Term 2", items: ["Materials", "Push and pull", "Water", "Weather"] },
+          { name: "Term 3", items: ["Day and night", "Healthy living", "Environmental care", "Simple experiments"] }
+        ],
+        activity: "Take a short nature walk, collect leaves safely, sort them by size, and talk about what plants need."
+      },
+      {
+        subject: "Ghanaian Language",
+        icon: "🗣️",
+        goal: "Develop confidence in a Ghanaian language through songs, rhymes, greetings, stories, vocabulary, and culture.",
+        topics: [
+          { title: "Oral Language", items: ["Greetings", "Songs and rhymes", "Listening to stories", "Speaking clearly"] },
+          { title: "Vocabulary", items: ["Names of family members", "Food, animals, and body parts", "Colours and numbers", "School and home objects"] },
+          { title: "Reading Readiness", items: ["Recognise familiar words", "Match pictures to words", "Hear beginning sounds", "Retell short stories"] },
+          { title: "Culture", items: ["Traditional songs", "Respectful language", "Festivals", "Good manners"] }
+        ],
+        terms: [
+          { name: "Term 1", items: ["Greetings", "Songs", "Family words", "Classroom words"] },
+          { name: "Term 2", items: ["Rhymes", "Colours", "Numbers", "Short stories"] },
+          { name: "Term 3", items: ["Picture reading", "Cultural words", "Role play", "Retelling"] }
+        ],
+        activity: "Practise greetings each morning and ask him to name five things at home in the local language."
+      },
+      {
+        subject: "Creative Arts",
+        icon: "🎨",
+        goal: "Build creativity through drawing, colouring, music, dance, drama, craft, pattern-making, and appreciation.",
+        topics: [
+          { title: "Visual Arts", items: ["Drawing and colouring", "Lines and shapes", "Patterns", "Simple collage and modelling"] },
+          { title: "Music", items: ["Sing simple songs", "Clap rhythms", "Listen and respond to sound", "Use safe local instruments"] },
+          { title: "Dance and Drama", items: ["Move to rhythm", "Act short stories", "Use facial expressions", "Perform in a group"] },
+          { title: "Appreciation", items: ["Talk about own artwork", "Respect others' work", "Care for materials", "Connect art to Ghanaian culture"] }
+        ],
+        terms: [
+          { name: "Term 1", items: ["Lines and colours", "Songs", "Body movements", "Simple crafts"] },
+          { name: "Term 2", items: ["Patterns", "Rhythm", "Drama play", "Local art forms"] },
+          { name: "Term 3", items: ["Modelling", "Group performance", "Art display", "Creative project"] }
+        ],
+        activity: "Give him crayons and scrap paper to draw a market, home, school, or favourite Ghanaian food."
+      },
+      {
+        subject: "Religious and Moral Education",
+        icon: "🙏",
+        shortName: "RME",
+        goal: "Nurture good character, faith awareness, respect, honesty, kindness, responsibility, and peaceful living.",
+        topics: [
+          { title: "God and Creation", items: ["God as Creator", "Thankfulness", "Care for creation", "Prayer and worship"] },
+          { title: "Good Manners", items: ["Greeting elders", "Saying please and thank you", "Sharing", "Keeping promises"] },
+          { title: "Moral Values", items: ["Truthfulness", "Obedience", "Respect", "Helping others"] },
+          { title: "Community Life", items: ["Family duties", "School rules", "Peaceful play", "Festivals and beliefs"] }
+        ],
+        terms: [
+          { name: "Term 1", items: ["Creation", "Prayer", "Respect", "Family duties"] },
+          { name: "Term 2", items: ["Truthfulness", "Obedience", "Kindness", "School rules"] },
+          { name: "Term 3", items: ["Helping others", "Peace", "Festivals", "Responsible choices"] }
+        ],
+        activity: "At bedtime, ask him to name one kind thing he did and one kind thing someone did for him."
+      },
+      {
+        subject: "History",
+        icon: "🏛️",
+        goal: "Introduce personal history, family stories, community history, important Ghanaian places, symbols, and heroes.",
+        topics: [
+          { title: "Personal History", items: ["My name", "My birthday", "My family story", "Past and present"] },
+          { title: "Community", items: ["Old and new things around us", "Community leaders", "Important places", "Stories from elders"] },
+          { title: "Ghana", items: ["National flag", "Coat of arms", "National anthem", "Important Ghanaian leaders"] },
+          { title: "Time", items: ["Yesterday, today, tomorrow", "Before and after", "Sequencing events", "Celebrations"] }
+        ],
+        terms: [
+          { name: "Term 1", items: ["My story", "Family history", "Past and present", "Time words"] },
+          { name: "Term 2", items: ["Community stories", "Important places", "National symbols", "Leaders"] },
+          { name: "Term 3", items: ["Ghanaian heroes", "Celebrations", "Story sequencing", "Simple timeline"] }
+        ],
+        activity: "Show him an old family photo and a new photo, then talk about what changed and what stayed the same."
+      },
+      {
+        subject: "Physical Education",
+        icon: "🏃",
+        shortName: "PE",
+        goal: "Develop movement, balance, coordination, teamwork, safety, fitness, and confidence through play.",
+        topics: [
+          { title: "Movement Skills", items: ["Running", "Jumping", "Hopping", "Skipping"] },
+          { title: "Ball Skills", items: ["Throwing", "Catching", "Rolling", "Kicking"] },
+          { title: "Balance and Coordination", items: ["Walk on a line", "Stretch safely", "Copy movements", "Move to rhythm"] },
+          { title: "Safety and Teamwork", items: ["Follow game rules", "Share equipment", "Play fairly", "Rest and drink water"] }
+        ],
+        terms: [
+          { name: "Term 1", items: ["Body control", "Running games", "Balance", "Safety rules"] },
+          { name: "Term 2", items: ["Throw and catch", "Jumping", "Rhythm movement", "Team games"] },
+          { name: "Term 3", items: ["Kicking", "Relay play", "Fitness games", "Fair play"] }
+        ],
+        activity: "Play a five-minute throw-and-catch game with a soft ball, praising effort and safe movement."
+      },
+      {
+        subject: "Computing",
+        icon: "💻",
+        goal: "Introduce safe technology use, parts of a computer, simple input devices, digital drawing, and responsible behaviour.",
+        topics: [
+          { title: "Computer Awareness", items: ["Monitor or screen", "Keyboard", "Mouse or touchpad", "System unit or tablet"] },
+          { title: "Using Devices", items: ["Tap and click", "Drag safely", "Type simple letters", "Open and close with help"] },
+          { title: "Digital Creativity", items: ["Draw with a simple app", "Choose colours", "Make shapes", "Talk about digital work"] },
+          { title: "Safety", items: ["Ask an adult before using a device", "Sit properly", "Take screen breaks", "Do not share private information"] }
+        ],
+        terms: [
+          { name: "Term 1", items: ["Parts of a computer", "Rules for device care", "Mouse or touch practice", "Screen safety"] },
+          { name: "Term 2", items: ["Keyboard letters", "Digital drawing", "Simple shapes", "Saving with help"] },
+          { name: "Term 3", items: ["Responsible use", "Simple instructions", "Technology at home", "Review project"] }
+        ],
+        activity: "Let him point to the screen, keyboard, and mouse, then draw a circle and square in a simple drawing app."
+      }
+    ];
+
+    const state = {
+      lessonIndex: 0,
+      syllabusIndex: 0,
+      selectedObject: null,
+      selectedShape: null,
+      matched: new Set(),
+      quizIndex: 0,
+      quizScore: 0,
+      answered: false,
+      progress: loadProgress()
+    };
+
+    const screens = document.querySelectorAll(".screen");
+    const lessonEmoji = document.getElementById("lessonEmoji");
+    const lessonTitle = document.getElementById("lessonTitle");
+    const lessonText = document.getElementById("lessonText");
+    const facesCount = document.getElementById("facesCount");
+    const edgesCount = document.getElementById("edgesCount");
+    const cornersCount = document.getElementById("cornersCount");
+    const lessonExamples = document.getElementById("lessonExamples");
+    const objectList = document.getElementById("objectList");
+    const shapeList = document.getElementById("shapeList");
+    const practiceFeedback = document.getElementById("practiceFeedback");
+    const scoreText = document.getElementById("scoreText");
+    const questionCountText = document.getElementById("questionCountText");
+    const quizProgress = document.getElementById("quizProgress");
+    const questionText = document.getElementById("questionText");
+    const answerGrid = document.getElementById("answerGrid");
+    const quizFeedback = document.getElementById("quizFeedback");
+    const nextQuestionButton = document.getElementById("nextQuestionButton");
+    const celebration = document.getElementById("celebration");
+    const subjectList = document.getElementById("subjectList");
+    const subjectDetails = document.getElementById("subjectDetails");
+
+    document.querySelectorAll("[data-go]").forEach((button) => {
+      button.addEventListener("click", () => showScreen(button.dataset.go));
+    });
+
+    document.getElementById("darkButton").addEventListener("click", toggleDarkMode);
+    document.getElementById("soundButton").addEventListener("click", readCurrentScreen);
+    document.getElementById("installButton").addEventListener("click", installApp);
+    document.getElementById("readLessonButton").addEventListener("click", readLesson);
+    document.getElementById("readSyllabusButton").addEventListener("click", readSyllabus);
+    document.getElementById("prevLessonButton").addEventListener("click", () => changeLesson(-1));
+    document.getElementById("nextLessonButton").addEventListener("click", () => changeLesson(1));
+    document.getElementById("resetPracticeButton").addEventListener("click", resetPractice);
+    document.getElementById("restartQuizButton").addEventListener("click", startQuiz);
+    nextQuestionButton.addEventListener("click", nextQuestion);
+    document.getElementById("clearProgressButton").addEventListener("click", clearProgress);
+    document.getElementById("makeCertificateButton").addEventListener("click", makeCertificate);
+    document.getElementById("printCertificateButton").addEventListener("click", () => window.print());
+
+    applySavedTheme();
+    registerServiceWorker();
+    setupInstallPrompt();
+    renderLesson();
+    renderPractice();
+    renderSyllabus();
+    startQuiz();
+    renderAchievements();
+
+    // Simple screen router for the single-page app.
+    function showScreen(id) {
+      screens.forEach((screen) => screen.classList.toggle("active", screen.id === id));
+      if (id === "quizScreen" && state.quizIndex >= quizQuestions.length) {
+        startQuiz();
+      }
+      if (id === "achievementsScreen") {
+        renderAchievements();
+      }
+      if (id === "syllabusScreen") {
+        renderSyllabus();
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Makes the app installable and available offline when opened from a web address.
+    function registerServiceWorker() {
+      if (!("serviceWorker" in navigator) || location.protocol === "file:") return;
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch((error) => {
+          console.warn("Offline install support was not available.", error);
+        });
+      });
+    }
+
+    let deferredInstallPrompt = null;
+
+    function setupInstallPrompt() {
+      const banner = document.getElementById("installBanner");
+      window.addEventListener("beforeinstallprompt", (event) => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        banner.classList.add("show");
+      });
+      window.addEventListener("appinstalled", () => {
+        banner.classList.remove("show");
+        deferredInstallPrompt = null;
+      });
+    }
+
+    async function installApp() {
+      const banner = document.getElementById("installBanner");
+      if (!deferredInstallPrompt) {
+        alert("On iPhone or iPad, open this page in Safari, tap Share, then choose Add to Home Screen.");
+        return;
+      }
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      banner.classList.remove("show");
+    }
+
+    // Draws the current lesson from the lesson data above.
+    function renderLesson() {
+      const lesson = lessons[state.lessonIndex];
+      lessonEmoji.textContent = lesson.emoji;
+      lessonTitle.textContent = lesson.name;
+      lessonText.textContent = lesson.text;
+      facesCount.textContent = lesson.faces;
+      edgesCount.textContent = lesson.edges;
+      cornersCount.textContent = lesson.corners;
+      lessonExamples.innerHTML = "";
+      lesson.examples.forEach((example) => {
+        const chip = document.createElement("span");
+        chip.className = "chip";
+        chip.textContent = example;
+        lessonExamples.appendChild(chip);
+      });
+    }
+
+    function changeLesson(step) {
+      state.lessonIndex = (state.lessonIndex + step + lessons.length) % lessons.length;
+      renderLesson();
+      speak(`${lessons[state.lessonIndex].name}. ${lessons[state.lessonIndex].text}`);
+    }
+
+    // Draws the Ghana Basic 1 syllabus guide and selected subject details.
+    function renderSyllabus() {
+      const selected = syllabusSubjects[state.syllabusIndex];
+      subjectList.innerHTML = "";
+      syllabusSubjects.forEach((subject, index) => {
+        const button = document.createElement("button");
+        button.className = `subject-button ${index === state.syllabusIndex ? "active" : ""}`;
+        button.type = "button";
+        button.textContent = `${subject.icon} ${subject.shortName || subject.subject}`;
+        button.addEventListener("click", () => {
+          state.syllabusIndex = index;
+          renderSyllabus();
+        });
+        subjectList.appendChild(button);
+      });
+
+      subjectDetails.innerHTML = `
+        <h2>${selected.icon} ${selected.subject}</h2>
+        <p>${selected.goal}</p>
+        <h3>What to learn</h3>
+        <div class="topic-grid">
+          ${selected.topics.map((topic) => `
+            <section class="topic-card">
+              <h3>${topic.title}</h3>
+              <ul>${topic.items.map((item) => `<li>${item}</li>`).join("")}</ul>
+            </section>
+          `).join("")}
+        </div>
+        <h3 style="margin-top: 14px;">Term-by-term focus</h3>
+        <div class="term-grid">
+          ${selected.terms.map((term) => `
+            <section class="term-card">
+              <h3>${term.name}</h3>
+              <ul>${term.items.map((item) => `<li>${item}</li>`).join("")}</ul>
+            </section>
+          `).join("")}
+        </div>
+        <div class="activity-box">
+          <h3>Home activity</h3>
+          <p>${selected.activity}</p>
+        </div>
+      `;
+    }
+
+    // Builds the object and shape buttons for the matching game.
+    function renderPractice() {
+      objectList.innerHTML = "";
+      shapeList.innerHTML = "";
+      matches.forEach((item, index) => {
+        const objectButton = document.createElement("button");
+        objectButton.className = "match-card";
+        objectButton.type = "button";
+        objectButton.textContent = item.object;
+        objectButton.dataset.index = index;
+        objectButton.addEventListener("click", () => selectObject(index));
+        objectList.appendChild(objectButton);
+      });
+
+      shuffle(matches.map((item) => item.shape)).forEach((shape) => {
+        const shapeButton = document.createElement("button");
+        shapeButton.className = "match-card";
+        shapeButton.type = "button";
+        shapeButton.textContent = shape;
+        shapeButton.dataset.shape = shape;
+        shapeButton.addEventListener("click", () => selectShape(shape));
+        shapeList.appendChild(shapeButton);
+      });
+    }
+
+    function selectObject(index) {
+      if (state.matched.has(index)) return;
+      state.selectedObject = index;
+      document.querySelectorAll("#objectList .match-card").forEach((button) => {
+        button.classList.toggle("selected", Number(button.dataset.index) === index);
+      });
+      checkMatch();
+    }
+
+    function selectShape(shape) {
+      if (isShapeMatched(shape)) return;
+      state.selectedShape = shape;
+      document.querySelectorAll("#shapeList .match-card").forEach((button) => {
+        button.classList.toggle("selected", button.dataset.shape === shape);
+      });
+      checkMatch();
+    }
+
+    // Checks a selected object and shape, then gives immediate feedback.
+    function checkMatch() {
+      if (state.selectedObject === null || !state.selectedShape) return;
+      const expected = matches[state.selectedObject].shape;
+      if (expected === state.selectedShape) {
+        state.matched.add(state.selectedObject);
+        practiceFeedback.textContent = "✅ Correct";
+        practiceFeedback.style.color = "var(--green)";
+        speak("Correct!");
+        markMatchedCards();
+        if (state.matched.size === matches.length) {
+          practiceFeedback.textContent = "✅ Correct! You matched every shape!";
+          burstConfetti(40);
+        }
+      } else {
+        practiceFeedback.textContent = "❌ Try Again";
+        practiceFeedback.style.color = "var(--primary-dark)";
+        speak("Try again.");
+      }
+      state.selectedObject = null;
+      state.selectedShape = null;
+      setTimeout(clearSelections, 350);
+    }
+
+    function markMatchedCards() {
+      document.querySelectorAll("#objectList .match-card").forEach((button) => {
+        if (state.matched.has(Number(button.dataset.index))) {
+          button.classList.add("done");
+        }
+      });
+      document.querySelectorAll("#shapeList .match-card").forEach((button) => {
+        if (isShapeMatched(button.dataset.shape)) {
+          button.classList.add("done");
+        }
+      });
+    }
+
+    function isShapeMatched(shape) {
+      return Array.from(state.matched).some((index) => matches[index].shape === shape);
+    }
+
+    function clearSelections() {
+      document.querySelectorAll(".match-card").forEach((button) => button.classList.remove("selected"));
+    }
+
+    function resetPractice() {
+      state.selectedObject = null;
+      state.selectedShape = null;
+      state.matched = new Set();
+      practiceFeedback.textContent = "";
+      renderPractice();
+    }
+
+    // Starts a fresh 20-question quiz.
+    function startQuiz() {
+      state.quizIndex = 0;
+      state.quizScore = 0;
+      state.answered = false;
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const question = quizQuestions[state.quizIndex];
+      state.answered = false;
+      scoreText.textContent = `Score: ${state.quizScore}`;
+      questionCountText.textContent = `Question ${state.quizIndex + 1} of ${quizQuestions.length}`;
+      quizProgress.style.width = `${(state.quizIndex / quizQuestions.length) * 100}%`;
+      questionText.textContent = question.q;
+      quizFeedback.textContent = "";
+      nextQuestionButton.classList.add("hidden");
+      answerGrid.innerHTML = "";
+      question.choices.forEach((choice) => {
+        const button = document.createElement("button");
+        button.className = "answer-button";
+        button.type = "button";
+        button.textContent = choice;
+        button.addEventListener("click", () => answerQuestion(button, choice));
+        answerGrid.appendChild(button);
+      });
+    }
+
+    function answerQuestion(button, choice) {
+      if (state.answered) return;
+      state.answered = true;
+      const correct = quizQuestions[state.quizIndex].a;
+      const buttons = answerGrid.querySelectorAll("button");
+      buttons.forEach((item) => {
+        item.disabled = true;
+        if (item.textContent === correct) item.classList.add("correct");
+      });
+      if (choice === correct) {
+        state.quizScore += 1;
+        button.classList.add("correct");
+        quizFeedback.textContent = "✅ Correct";
+        quizFeedback.style.color = "var(--green)";
+        showCelebration("⭐");
+        playTone(660);
+        speak("Correct!");
+      } else {
+        button.classList.add("wrong");
+        quizFeedback.textContent = `❌ Try Again. The answer is ${correct}.`;
+        quizFeedback.style.color = "var(--primary-dark)";
+        playTone(220);
+        speak(`Try again. The answer is ${correct}.`);
+      }
+      scoreText.textContent = `Score: ${state.quizScore}`;
+      nextQuestionButton.classList.remove("hidden");
+    }
+
+    function nextQuestion() {
+      state.quizIndex += 1;
+      if (state.quizIndex < quizQuestions.length) {
+        renderQuestion();
+      } else {
+        finishQuiz();
+      }
+    }
+
+    // Saves quiz results, updates achievements, and celebrates completion.
+    function finishQuiz() {
+      quizProgress.style.width = "100%";
+      questionCountText.textContent = "Quiz complete";
+      questionText.textContent = `Great adventure! You scored ${state.quizScore} out of ${quizQuestions.length}.`;
+      answerGrid.innerHTML = "";
+      quizFeedback.textContent = state.quizScore >= 16 ? "🏆 Certificate unlocked!" : "Keep practicing to unlock your certificate!";
+      nextQuestionButton.classList.add("hidden");
+      state.progress.totalQuizzes += 1;
+      state.progress.highestScore = Math.max(state.progress.highestScore, state.quizScore);
+      state.progress.totalCorrect = Math.max(state.progress.totalCorrect, state.quizScore);
+      state.progress.lastScore = state.quizScore;
+      state.progress.masteredShapes = calculateMasteredShapes(state.progress.highestScore);
+      saveProgress();
+      renderAchievements();
+      burstConfetti(90);
+      showCelebration("🎉");
+      speak(`Quiz complete. You scored ${state.quizScore} out of ${quizQuestions.length}.`);
+    }
+
+    function calculateMasteredShapes(score) {
+      return Math.min(lessons.length, Math.floor((score / quizQuestions.length) * lessons.length));
+    }
+
+    // Refreshes badges, certificate status, and the parent dashboard numbers.
+    function renderAchievements() {
+      const badgeGrid = document.getElementById("badgeGrid");
+      badgeGrid.innerHTML = "";
+      badgeRules.forEach((badge) => {
+        const earned = state.progress.highestScore >= badge.needed;
+        const badgeCard = document.createElement("article");
+        badgeCard.className = `badge ${earned ? "earned" : ""}`;
+        badgeCard.innerHTML = `<span class="badge-icon">${badge.icon}</span><h3>${badge.name}</h3><p>${badge.needed} correct answers</p>`;
+        badgeGrid.appendChild(badgeCard);
+      });
+      document.getElementById("totalQuizzes").textContent = state.progress.totalQuizzes;
+      document.getElementById("highestScore").textContent = `${state.progress.highestScore}/20`;
+      document.getElementById("progressPercent").textContent = `${Math.round((state.progress.highestScore / quizQuestions.length) * 100)}%`;
+      document.getElementById("shapesMastered").textContent = `${state.progress.masteredShapes}/6`;
+    }
+
+    function makeCertificate() {
+      const certificate = document.getElementById("certificate");
+      const name = document.getElementById("childName").value.trim() || "Shape Explorer";
+      if (state.progress.highestScore < 16) {
+        certificate.classList.remove("show");
+        alert("Score 16 out of 20 or more to unlock the certificate.");
+        return;
+      }
+      document.getElementById("certificateName").textContent = name;
+      document.getElementById("certificateScore").textContent = `Score: ${state.progress.highestScore} out of 20`;
+      document.getElementById("certificateDate").textContent = new Date().toLocaleDateString();
+      certificate.classList.add("show");
+      speak(`Congratulations ${name}. You are a 3D Shapes Champion.`);
+    }
+
+    function clearProgress() {
+      if (!confirm("Clear saved scores and badges?")) return;
+      state.progress = defaultProgress();
+      localStorage.removeItem("shapeAdventureProgress");
+      renderAchievements();
+      document.getElementById("certificate").classList.remove("show");
+    }
+
+    function readCurrentScreen() {
+      const active = document.querySelector(".screen.active");
+      const text = active ? active.innerText.replace(/\s+/g, " ").trim() : "3D Shapes Adventure";
+      speak(text);
+    }
+
+    function readLesson() {
+      const lesson = lessons[state.lessonIndex];
+      speak(`${lesson.name}. ${lesson.text} It has ${lesson.faces} faces, ${lesson.edges} edges, and ${lesson.corners} corners. Examples are ${lesson.examples.join(", ")}.`);
+    }
+
+    function readSyllabus() {
+      const subject = syllabusSubjects[state.syllabusIndex];
+      const topics = subject.topics.map((topic) => `${topic.title}: ${topic.items.join(", ")}`).join(". ");
+      speak(`${subject.subject}. ${subject.goal}. ${topics}. Home activity: ${subject.activity}`);
+    }
+
+    // Uses the browser's built-in voice when available. The app still works without it.
+    function speak(text) {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      utterance.pitch = 1.1;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Tiny offline sound effect made with the Web Audio API.
+    function playTone(frequency) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const audioContext = new AudioContext();
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        oscillator.frequency.value = frequency;
+        oscillator.type = "sine";
+        gain.gain.setValueAtTime(0.05, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.18);
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.18);
+      } catch (error) {
+        console.warn("Audio was not available.", error);
+      }
+    }
+
+    function showCelebration(symbol) {
+      celebration.textContent = symbol;
+      celebration.classList.add("show");
+      setTimeout(() => celebration.classList.remove("show"), 700);
+    }
+
+    // Lightweight confetti animation without external libraries.
+    function burstConfetti(amount) {
+      const colors = ["#ff6b6b", "#ffd166", "#2ec4b6", "#4d96ff", "#8f65ff", "#42c767"];
+      for (let i = 0; i < amount; i += 1) {
+        const piece = document.createElement("span");
+        piece.className = "confetti-piece";
+        piece.style.left = `${Math.random() * 100}vw`;
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDelay = `${Math.random() * 0.45}s`;
+        piece.style.transform = `rotate(${Math.random() * 180}deg)`;
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 2300);
+      }
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+      const enabled = document.body.classList.contains("dark");
+      document.getElementById("darkButton").textContent = enabled ? "☀️" : "🌙";
+      localStorage.setItem("shapeAdventureDarkMode", enabled ? "yes" : "no");
+    }
+
+    function applySavedTheme() {
+      if (localStorage.getItem("shapeAdventureDarkMode") === "yes") {
+        document.body.classList.add("dark");
+        document.getElementById("darkButton").textContent = "☀️";
+      }
+    }
+
+    function defaultProgress() {
+      return {
+        totalQuizzes: 0,
+        highestScore: 0,
+        totalCorrect: 0,
+        lastScore: 0,
+        masteredShapes: 0
+      };
+    }
+
+    // Local Storage keeps progress on the same device between visits.
+    function loadProgress() {
+      try {
+        return { ...defaultProgress(), ...JSON.parse(localStorage.getItem("shapeAdventureProgress")) };
+      } catch (error) {
+        return defaultProgress();
+      }
+    }
+
+    function saveProgress() {
+      localStorage.setItem("shapeAdventureProgress", JSON.stringify(state.progress));
+    }
+
+    function shuffle(items) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+  </script>
+</body>
+</html>

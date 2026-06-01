@@ -503,6 +503,67 @@
       background: rgba(77, 150, 255, 0.12);
     }
 
+    .kid-lesson {
+      margin-bottom: 14px;
+      padding: 16px;
+      border: 3px solid rgba(37, 48, 71, 0.08);
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(255, 209, 102, 0.36), rgba(46, 196, 182, 0.18));
+    }
+
+    .kid-lesson-top {
+      display: grid;
+      gap: 12px;
+    }
+
+    .big-topic-icon {
+      display: grid;
+      min-height: 120px;
+      place-items: center;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.58);
+      font-size: clamp(4rem, 22vw, 7rem);
+      animation: bob 3s ease-in-out infinite;
+    }
+
+    body.dark .big-topic-icon {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .topic-progress {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.68);
+      color: var(--text);
+      font-weight: 900;
+    }
+
+    .learn-points {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .learn-points li {
+      padding: 11px;
+      border-radius: var(--radius);
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .lesson-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
     .topic-card h3,
     .term-card h3 {
       color: var(--primary-dark);
@@ -730,6 +791,11 @@
         grid-template-columns: repeat(2, 1fr);
       }
 
+      .kid-lesson-top {
+        grid-template-columns: 160px 1fr;
+        align-items: center;
+      }
+
       .name-row {
         grid-template-columns: 1fr auto;
         align-items: center;
@@ -888,8 +954,8 @@
         <button class="read-button" type="button" id="readSyllabusButton">🔊 Read</button>
       </div>
       <div class="panel">
-        <h2>Ghana Basic 1 Syllabus</h2>
-        <p>A parent-friendly guide for Basic 1 learning areas in Ghana, with simple topics and home activities for a 5-year-old learner.</p>
+        <h2>Ghana Basic 1 Learn</h2>
+        <p>Tap a subject, then use Next Topic to learn step by step with simple words, examples, and home practice.</p>
         <div class="syllabus-layout">
           <aside class="subject-list" id="subjectList" aria-label="Basic 1 subjects"></aside>
           <article id="subjectDetails" aria-live="polite"></article>
@@ -1224,6 +1290,7 @@
     const state = {
       lessonIndex: 0,
       syllabusIndex: 0,
+      syllabusTopicIndex: 0,
       selectedObject: null,
       selectedShape: null,
       matched: new Set(),
@@ -1361,6 +1428,8 @@
     // Draws the Ghana Basic 1 syllabus guide and selected subject details.
     function renderSyllabus() {
       const selected = syllabusSubjects[state.syllabusIndex];
+      const topic = selected.topics[state.syllabusTopicIndex] || selected.topics[0];
+      const topicNumber = state.syllabusTopicIndex + 1;
       subjectList.innerHTML = "";
       syllabusSubjects.forEach((subject, index) => {
         const button = document.createElement("button");
@@ -1369,20 +1438,43 @@
         button.textContent = `${subject.icon} ${subject.shortName || subject.subject}`;
         button.addEventListener("click", () => {
           state.syllabusIndex = index;
+          state.syllabusTopicIndex = 0;
           renderSyllabus();
         });
         subjectList.appendChild(button);
       });
 
       subjectDetails.innerHTML = `
+        <section class="kid-lesson">
+          <div class="kid-lesson-top">
+            <div class="big-topic-icon" aria-hidden="true">${selected.icon}</div>
+            <div>
+              <span class="topic-progress">${selected.shortName || selected.subject} topic ${topicNumber} of ${selected.topics.length}</span>
+              <h2>${topic.title}</h2>
+              <p>${makeChildIntro(selected, topic)}</p>
+            </div>
+          </div>
+          <h3>Learn these</h3>
+          <ul class="learn-points">
+            ${topic.items.map((item) => `<li>✅ ${makeChildPoint(item)}</li>`).join("")}
+          </ul>
+          <div class="activity-box">
+            <h3>Try this now</h3>
+            <p>${makeTopicActivity(selected, topic)}</p>
+          </div>
+          <div class="lesson-actions">
+            <button class="secondary-button" type="button" id="prevTopicButton">← Topic</button>
+            <button class="primary-button" type="button" id="nextTopicButton">Next Topic →</button>
+          </div>
+        </section>
         <h2>${selected.icon} ${selected.subject}</h2>
         <p>${selected.goal}</p>
-        <h3>What to learn</h3>
+        <h3>All topics in this subject</h3>
         <div class="topic-grid">
-          ${selected.topics.map((topic) => `
+          ${selected.topics.map((topicItem, index) => `
             <section class="topic-card">
-              <h3>${topic.title}</h3>
-              <ul>${topic.items.map((item) => `<li>${item}</li>`).join("")}</ul>
+              <h3>${index + 1}. ${topicItem.title}</h3>
+              <ul>${topicItem.items.map((item) => `<li>${item}</li>`).join("")}</ul>
             </section>
           `).join("")}
         </div>
@@ -1400,6 +1492,43 @@
           <p>${selected.activity}</p>
         </div>
       `;
+      document.getElementById("prevTopicButton").addEventListener("click", () => changeSyllabusTopic(-1));
+      document.getElementById("nextTopicButton").addEventListener("click", () => changeSyllabusTopic(1));
+    }
+
+    function changeSyllabusTopic(step) {
+      const subject = syllabusSubjects[state.syllabusIndex];
+      state.syllabusTopicIndex = (state.syllabusTopicIndex + step + subject.topics.length) % subject.topics.length;
+      renderSyllabus();
+      readSyllabus();
+    }
+
+    function makeChildIntro(subject, topic) {
+      const subjectName = subject.shortName || subject.subject;
+      return `Today we are learning ${topic.title.toLowerCase()} in ${subjectName}. Listen, say the words, and try the activity.`;
+    }
+
+    function makeChildPoint(item) {
+      return item
+        .replace("Recognise", "Look for")
+        .replace("Compare", "Tell which is")
+        .replace("Retell", "Tell again")
+        .replace("Sequence", "Put in order");
+    }
+
+    function makeTopicActivity(subject, topic) {
+      const title = topic.title.toLowerCase();
+      if (title.includes("number") || title.includes("count")) return "Count 10 things near you. Touch each one as you count: 1, 2, 3.";
+      if (title.includes("operation")) return "Use 5 bottle tops. Add 2 more. Count them all. Now take 1 away.";
+      if (title.includes("phonics") || title.includes("reading")) return "Say the first sound in these words: ball, cup, sun, mat.";
+      if (title.includes("writing")) return "Write your name, then copy one short sentence carefully.";
+      if (title.includes("family") || title.includes("myself")) return "Say your full name and name three people in your family.";
+      if (title.includes("plant") || title.includes("living")) return "Look at a plant. Point to the leaves and say what plants need.";
+      if (title.includes("music")) return "Clap this pattern: clap, clap, pause. Try it three times.";
+      if (title.includes("movement") || title.includes("ball")) return "Do five safe jumps, then throw and catch a soft ball.";
+      if (title.includes("computer") || title.includes("device")) return "Point to the screen, keyboard, and mouse or touchpad.";
+      if (title.includes("ghana") || title.includes("nation")) return "Point to Ghana on a map or say the colours of the Ghana flag.";
+      return subject.activity;
     }
 
     // Builds the object and shape buttons for the matching game.
@@ -1640,8 +1769,8 @@
 
     function readSyllabus() {
       const subject = syllabusSubjects[state.syllabusIndex];
-      const topics = subject.topics.map((topic) => `${topic.title}: ${topic.items.join(", ")}`).join(". ");
-      speak(`${subject.subject}. ${subject.goal}. ${topics}. Home activity: ${subject.activity}`);
+      const topic = subject.topics[state.syllabusTopicIndex] || subject.topics[0];
+      speak(`${subject.subject}. ${topic.title}. ${makeChildIntro(subject, topic)} Learn these: ${topic.items.join(", ")}. Try this now: ${makeTopicActivity(subject, topic)}`);
     }
 
     // Uses the browser's built-in voice when available. The app still works without it.
